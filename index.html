@@ -277,6 +277,30 @@
 
   var katLaager, katSide, gaver, valgte, spilAktiv;
 
+  var LYD_FILER = {
+    laage: ["lyd/laage.mp3", "lyd/laage.ogg", "lyd/laage.wav"],
+    god: ["lyd/god.mp3", "lyd/god.ogg", "lyd/god.wav"],
+    kat: ["lyd/kat.mp3", "lyd/kat.ogg", "lyd/kat.wav"],
+    sejr: ["lyd/sejr.mp3", "lyd/sejr.ogg", "lyd/sejr.wav"],
+    tab: ["lyd/tab.mp3", "lyd/tab.ogg", "lyd/tab.wav"]
+  };
+  var lydCache = {};
+
+  function spilLyd(navn) {
+    var filer = LYD_FILER[navn] || [];
+    function prov(index) {
+      if (index >= filer.length) return;
+      try {
+        if (!lydCache[navn + index]) lydCache[navn + index] = new Audio(filer[index]);
+        var a = lydCache[navn + index];
+        a.currentTime = 0;
+        var p = a.play();
+        if (p && p.catch) p.catch(function () { prov(index + 1); });
+      } catch (e) { prov(index + 1); }
+    }
+    prov(0);
+  }
+
   function bland(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -351,6 +375,7 @@
 
   function aabenLaage(laage) {
     if (!spilAktiv || laage.classList.contains("aaben")) return;
+    spilLyd("laage");
     laage.classList.add("aaben");
     var d = parseInt(laage.dataset.index, 10);
     for (var v = 0; v < 2; v++) {
@@ -380,6 +405,7 @@
     });
 
     if (erKat) {
+      spilLyd("kat");
       vindue.classList.add("valgt-ond");
       vindue.innerHTML = '<span>😾</span><span class="tekst">Ond kat!</span>';
       gaver--;
@@ -387,6 +413,7 @@
       valgte++;
       if (gaver <= 0) {
         spilAktiv = false;
+        spilLyd("tab");
         visOverlay("😿 Suk hulk...", "Den " + ANTAL_GAVER + ". onde kat spiste din sidste gave. Julen bliver ikke til noget i år...");
       }
     } else {
@@ -400,6 +427,7 @@
       valgte++;
       if (valgte === ANTAL_LAAGER && gaver > 0) {
         spilAktiv = false;
+        spilLyd("sejr");
         visOverlay("🎉 HURRAAA — det blev jul! 🎉", "Du åbnede alle 24 låger og beholdt " + gaver + (gaver === 1 ? " gave" : " gaver") + "! God jul!");
       }
     }
