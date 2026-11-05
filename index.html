@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Julekalenderen</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5b1f1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Julekalender">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+
+  body {
+    font-family: "Georgia", "Times New Roman", serif;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at top, #5b1f1f 0%, #3a1212 45%, #1d0808 100%);
+    color: #ffe9c9;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .lysstreng {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 2px;
+    font-size: 22px;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+  .lysstreng span:nth-child(4n+1) { color: #ff5252; animation: blink 1.2s infinite; }
+  .lysstreng span:nth-child(4n+2) { color: #ffd740; animation: blink 1.2s .3s infinite; }
+  .lysstreng span:nth-child(4n+3) { color: #69f0ae; animation: blink 1.2s .6s infinite; }
+  .lysstreng span:nth-child(4n+4) { color: #40c4ff; animation: blink 1.2s .9s infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  header {
+    text-align: center;
+    padding: 6px 10px 14px;
+  }
+  h1 {
+    font-size: clamp(26px, 4vw, 44px);
+    color: #ffd740;
+    text-shadow: 0 0 18px rgba(255, 180, 60, .7), 0 2px 0 #7a2c00;
+    letter-spacing: 2px;
+  }
+  .subtitle { font-style: italic; color: #ffc9a3; margin-top: 4px; font-size: clamp(13px, 1.8vw, 17px); }
+
+  .gaver {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(28px, 4vw, 40px);
+    padding: 8px 0 2px;
+  }
+  .gave { transition: transform .3s, filter .3s, opacity .3s; }
+  .gave.spist { filter: grayscale(1) brightness(.4); transform: scale(.75) rotate(-12deg); opacity: .5; }
+  .gave-label { text-align: center; font-size: 14px; color: #ffc9a3; font-style: italic; margin-bottom: 10px; }
+
+  .spil {
+    display: flex;
+    gap: 18px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    align-items: flex-start;
+  }
+
+  .kalender {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding-top: 10px;
+  }
+
+  .juletrae {
+    width: 180px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 12px;
+    background: linear-gradient(160deg, rgba(90, 30, 20, .88), rgba(50, 15, 10, .88));
+    border: 3px solid #c9962e;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.45);
+  }
+  .trae { font-size: 74px; filter: drop-shadow(0 0 12px rgba(105, 240, 174, .55)); }
+  .pynt {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 8px;
+    font-size: 22px;
+    min-height: 28px;
+  }
+  .pynt-bit { display: inline-block; animation: pop .45s ease; }
+  @keyframes pop {
+    0% { transform: scale(0) rotate(-40deg); }
+    70% { transform: scale(1.5) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .trae-label { font-size: 12px; font-style: italic; color: #ffc9a3; margin-top: 8px; line-height: 1.4; }
+
+  .laage {
+    position: relative;
+    aspect-ratio: 2 / 1.15;
+    border-radius: 10px;
+    background: linear-gradient(160deg, #8e2f2f, #5e1a1a);
+    border: 3px solid #c9962e;
+    box-shadow: inset 0 0 12px rgba(0,0,0,.55), 0 4px 8px rgba(0,0,0,.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .laage:not(.aaben):hover { transform: scale(1.05); box-shadow: inset 0 0 12px rgba(0,0,0,.55), 0 0 16px rgba(255, 215, 64, .55); }
+  .laage .nummer {
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: bold;
+    color: #ffd740;
+    text-shadow: 0 2px 3px rgba(0,0,0,.6);
+  }
+  .laage .stjerne { position: absolute; top: 4px; right: 7px; font-size: 14px; opacity: .8; }
+
+  .laage.aaben {
+    background: linear-gradient(160deg, #2c1a0e, #1a0f08);
+    cursor: default;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 7px;
+  }
+  .laage.aaben .nummer { display: none; }
+
+  .vindue {
+    border: 2px solid #c9962e;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #10233b, #050b14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: clamp(18px, 3vw, 26px);
+    padding: 4px;
+    text-align: center;
+    transition: box-shadow .15s, transform .15s;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+  }
+  .vindue:hover { box-shadow: 0 0 12px rgba(120, 190, 255, .7); transform: scale(1.04); }
+  .vindue .lukket { filter: brightness(.35) saturate(.4); }
+  .vindue .tekst { font-size: clamp(9px, 1.4vw, 12px); color: #ffe9c9; line-height: 1.15; margin-top: 2px; }
+  .vindue.valgt-god { background: linear-gradient(180deg, #1d4d2b, #0d2413); box-shadow: 0 0 14px rgba(105, 240, 174, .8); cursor: default; }
+  .vindue.valgt-ond { background: linear-gradient(180deg, #4d1d1d, #240d0d); box-shadow: 0 0 14px rgba(255, 82, 82, .8); cursor: default; }
+  .vindue.valgt { cursor: default; }
+  .vindue.valgt:hover { transform: none; box-shadow: 0 0 14px rgba(255,255,255,.25); }
+
+
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 4, 2, .88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    text-align: center;
+    padding: 20px;
+  }
+  .overlay.vis { display: flex; }
+  .overlay .kort {
+    background: linear-gradient(160deg, #6e1f1f, #3d1010);
+    border: 4px solid #ffd740;
+    border-radius: 18px;
+    padding: 36px 44px;
+    max-width: 520px;
+    box-shadow: 0 0 40px rgba(255, 200, 80, .4);
+  }
+  .overlay h2 { font-size: clamp(28px, 5vw, 42px); color: #ffd740; margin-bottom: 12px; }
+  .overlay p { font-size: clamp(16px, 2.4vw, 20px); color: #ffe9c9; margin-bottom: 20px; line-height: 1.5; }
+  .overlay button {
+    font-family: inherit;
+    font-size: 20px;
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: 3px solid #7a2c00;
+    background: linear-gradient(180deg, #ffd740, #e0a92e);
+    color: #4a1c00;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #7a2c00;
+  }
+  .overlay button:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a2c00; }
+
+  .snefnug {
+    position: fixed;
+    top: -20px;
+    color: #fff;
+    opacity: .8;
+    pointer-events: none;
+    z-index: 5;
+    animation: fald linear infinite;
+  }
+  @keyframes fald {
+    to { transform: translateY(110vh) rotate(360deg); }
+  }
+
+  @media (max-width: 900px) {
+    .spil { flex-direction: column; align-items: center; }
+    .juletrae { position: static; width: 100%; max-width: 420px; order: -1; margin-top: 8px; }
+    .trae { font-size: 54px; }
+    .kalender { grid-template-columns: repeat(3, 1fr); gap: 7px; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lysstreng" id="lysstreng"></div>
+
+<header>
+  <h1>🎄 Julekalenderen 🎄</h1>
+  <p class="subtitle">Tryk på en låge for at åbne den — og vælg et vindue. Pas på de onde katte!</p>
+</header>
+
+<div class="gaver" id="gaver"></div>
+<div class="gave-label" id="gaveLabel"></div>
+
+<div class="spil">
+  <div class="kalender" id="kalender"></div>
+  <aside class="juletrae">
+    <div class="trae">🎄</div>
+    <div class="pynt" id="pynt"></div>
+    <div class="trae-label">Juletræet bliver pyntet med hver god ting, du finder!</div>
+  </aside>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="kort">
+    <h2 id="overlayTitel"></h2>
+    <p id="overlayTekst"></p>
+    <button id="startIgen">🎁 Spil igen</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ANTAL_LAAGER = 24;
+  var ANTAL_KATTE = 6;
+  var ANTAL_GAVER = 6;
+
+  var godeTing = [
+    ["🍬", "Slikstang"], ["🍪", "Pebernød"], ["⭐", "Stjerne"], ["🔔", "Juleklokke"],
+    ["🕯️", "Levende lys"], ["⛄", "Snemand"], ["🦌", "Rudolf"], ["🎀", "Sløjfe"],
+    ["🔮", "Krystalkugle"], ["☕", "Varm kakao"], ["🧤", "Vante"], ["🎶", "Julesang"],
+    ["🌲", "Juletræ"], ["❄️", "Snefnug"], ["👼", "Engel"], ["🏮", "Lanterne"],
+    ["🎵", "Musik"], ["🍫", "Chokolade"], ["🧸", "Nissebamse"], ["🥨", "Krans"],
+    ["🕊️", "Fred på jord"], ["🍎", "Æble"], ["🧦", "Julesok"], ["🌟", "Stjernedrys"],
+    ["🍯", "Honningkage"]
+  ];
+
+  var kalender = document.getElementById("kalender");
+  var gaverEl = document.getElementById("gaver");
+  var gaveLabel = document.getElementById("gaveLabel");
+  var pyntEl = document.getElementById("pynt");
+  var overlay = document.getElementById("overlay");
+  var overlayTitel = document.getElementById("overlayTitel");
+  var overlayTekst = document.getElementById("overlayTekst");
+
+  var katLaager, katSide, gaver, valgte, spilAktiv;
+
+  function bland(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function opretSne() {
+    document.querySelectorAll(".snefnug").forEach(function (s) { s.remove(); });
+    for (var i = 0; i < 40; i++) {
+      var f = document.createElement("div");
+      f.className = "snefnug";
+      f.textContent = Math.random() < 0.7 ? "❄" : "•";
+      f.style.left = Math.random() * 100 + "vw";
+      f.style.fontSize = (8 + Math.random() * 14) + "px";
+      f.style.animationDuration = (6 + Math.random() * 8) + "s";
+      f.style.animationDelay = (-Math.random() * 12) + "s";
+      document.body.appendChild(f);
+    }
+  }
+
+  function opretLys() {
+    var streng = document.getElementById("lysstreng");
+    streng.innerHTML = "";
+    for (var i = 0; i < 24; i++) {
+      var s = document.createElement("span");
+      s.textContent = "💡";
+      streng.appendChild(s);
+    }
+  }
+
+  function nulstil() {
+    var indices = [];
+    for (var i = 0; i < ANTAL_LAAGER; i++) indices.push(i);
+    katLaager = bland(indices).slice(0, ANTAL_KATTE);
+    katSide = {};
+    katLaager.forEach(function (d) { katSide[d] = Math.random() < 0.5 ? 0 : 1; });
+
+    gaver = ANTAL_GAVER;
+    valgte = 0;
+    spilAktiv = true;
+    pyntEl.innerHTML = "";
+
+    kalender.innerHTML = "";
+    for (var d = 0; d < ANTAL_LAAGER; d++) {
+      var laage = document.createElement("div");
+      laage.className = "laage";
+      laage.dataset.index = d;
+      laage.innerHTML = '<span class="stjerne">✨</span><span class="nummer">' + (d + 1) + "</span>";
+      laage.addEventListener("click", function () { aabenLaage(this); });
+      kalender.appendChild(laage);
+    }
+
+    opdaterGaver();
+    overlay.classList.remove("vis");
+  }
+
+  function opdaterGaver() {
+    gaverEl.innerHTML = "";
+    for (var i = 0; i < ANTAL_GAVER; i++) {
+      var g = document.createElement("span");
+      g.className = "gave" + (i < ANTAL_GAVER - gaver ? " spist" : "");
+      g.textContent = i < ANTAL_GAVER - gaver ? "💔" : "🎁";
+      gaverEl.appendChild(g);
+    }
+    gaveLabel.textContent = gaver === 1
+      ? "Du har " + gaver + " gave tilbage — pas godt på den!"
+      : "Du har " + gaver + " gaver tilbage";
+  }
+
+  function aabenLaage(laage) {
+    if (!spilAktiv || laage.classList.contains("aaben")) return;
+    laage.classList.add("aaben");
+    var d = parseInt(laage.dataset.index, 10);
+    for (var v = 0; v < 2; v++) {
+      var vindue = document.createElement("div");
+      vindue.className = "vindue";
+      vindue.dataset.laage = d;
+      vindue.dataset.side = v;
+      vindue.innerHTML = '<span class="lukket">❓</span><span class="tekst">?</span>';
+      vindue.addEventListener("click", function () { vaelgVindue(this); });
+      laage.appendChild(vindue);
+    }
+  }
+
+  function vaelgVindue(vindue) {
+    if (!spilAktiv) return;
+    var laage = vindue.parentElement;
+    if (laage.querySelector(".valgt")) return;
+
+    var d = parseInt(vindue.dataset.laage, 10);
+    var side = parseInt(vindue.dataset.side, 10);
+    var erKat = katLaager.indexOf(d) !== -1 && katSide[d] === side;
+
+    laage.querySelectorAll(".vindue").forEach(function (v) {
+      v.classList.add("valgt");
+      v.querySelector(".lukket").textContent = "🪟";
+      v.querySelector(".tekst").textContent = "";
+    });
+
+    if (erKat) {
+      vindue.classList.add("valgt-ond");
+      vindue.innerHTML = '<span>😾</span><span class="tekst">Ond kat!</span>';
+      gaver--;
+      opdaterGaver();
+      valgte++;
+      if (gaver <= 0) {
+        spilAktiv = false;
+        visOverlay("😿 Suk hulk...", "Den fjerde onde kat spiste din sidste gave. Julen bliver ikke til noget i år...");
+      }
+    } else {
+      var ting = godeTing[d];
+      vindue.classList.add("valgt-god");
+      vindue.innerHTML = '<span>' + ting[0] + '</span><span class="tekst">' + ting[1] + "</span>";
+      var bit = document.createElement("span");
+      bit.className = "pynt-bit";
+      bit.textContent = ting[0];
+      pyntEl.appendChild(bit);
+      valgte++;
+      if (valgte === ANTAL_LAAGER && gaver > 0) {
+        spilAktiv = false;
+        visOverlay("🎉 HURRAAA — det blev jul! 🎉", "Du åbnede alle 24 låger og beholdt " + gaver + (gaver === 1 ? " gave" : " gaver") + "! God jul!");
+      }
+    }
+  }
+
+  function visOverlay(titel, tekst) {
+    overlayTitel.textContent = titel;
+    overlayTekst.textContent = tekst;
+    overlay.classList.add("vis");
+  }
+
+  document.getElementById("startIgen").addEventListener("click", nulstil);
+
+  opretLys();
+  opretSne();
+  nulstil();
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+})();
+</script>
+</body>
+</html>
