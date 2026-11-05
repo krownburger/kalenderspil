@@ -1,7 +1,7 @@
 {
   "name": "Julekalenderen",
   "short_name": "Julekalender",
-  "description": "Åbn 24 låger — der gemmer sig en ond kat bag hver låge. Vælg det rigtige vindue, behold dine 8 gaver og pynt juletræet!",
+  "description": "Åbn 24 låger — 12 af dem gemmer en ond kat bag det ene vindue. Vælg klogt, behold dine 6 gaver og pynt juletræet!",
   "lang": "da",
   "start_url": "./index.html",
   "scope": "./",
