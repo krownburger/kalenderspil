@@ -228,7 +228,7 @@
 
 <header>
   <h1>🎄 Julekalenderen 🎄</h1>
-  <p class="subtitle">Tryk på en låge for at åbne den — og vælg et vindue. Pas på de onde katte!</p>
+  <p class="subtitle">Tryk på en låge for at åbne den — og vælg et vindue. Der gemmer sig en ond kat bag hver låge, så vælg klogt!</p>
 </header>
 
 <div class="gaver" id="gaver"></div>
@@ -254,8 +254,8 @@
 <script>
 (function () {
   var ANTAL_LAAGER = 24;
-  var ANTAL_KATTE = 6;
-  var ANTAL_GAVER = 6;
+  var ANTAL_KATTE = 24;
+  var ANTAL_GAVER = 8;
 
   var godeTing = [
     ["🍬", "Slikstang"], ["🍪", "Pebernød"], ["⭐", "Stjerne"], ["🔔", "Juleklokke"],
@@ -387,7 +387,7 @@
       valgte++;
       if (gaver <= 0) {
         spilAktiv = false;
-        visOverlay("😿 Suk hulk...", "Den fjerde onde kat spiste din sidste gave. Julen bliver ikke til noget i år...");
+        visOverlay("😿 Suk hulk...", "Den " + ANTAL_GAVER + ". onde kat spiste din sidste gave. Julen bliver ikke til noget i år...");
       }
     } else {
       var ting = godeTing[d];
