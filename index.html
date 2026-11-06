@@ -59,6 +59,7 @@
   .gave { transition: transform .3s, filter .3s, opacity .3s; }
   .gave.spist { filter: grayscale(1) brightness(.4); transform: scale(.75) rotate(-12deg); opacity: .5; }
   .gave-label { text-align: center; font-size: 14px; color: #ffc9a3; font-style: italic; margin-bottom: 10px; }
+  .gave-label.advarsel { color: #ff5252; font-weight: bold; animation: blink .8s infinite; }
 
   .spil {
     display: flex;
@@ -77,36 +78,6 @@
     padding-top: 10px;
   }
 
-  .juletrae {
-    width: 180px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 12px;
-    background: linear-gradient(160deg, rgba(90, 30, 20, .88), rgba(50, 15, 10, .88));
-    border: 3px solid #c9962e;
-    border-radius: 14px;
-    padding: 14px 10px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.45);
-  }
-  .trae { font-size: 74px; filter: drop-shadow(0 0 12px rgba(105, 240, 174, .55)); }
-  .pynt {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: center;
-    margin-top: 8px;
-    font-size: 22px;
-    min-height: 28px;
-  }
-  .pynt-bit { display: inline-block; animation: pop .45s ease; }
-  @keyframes pop {
-    0% { transform: scale(0) rotate(-40deg); }
-    70% { transform: scale(1.5) rotate(10deg); }
-    100% { transform: scale(1) rotate(0); }
-  }
-  .trae-label { font-size: 12px; font-style: italic; color: #ffc9a3; margin-top: 8px; line-height: 1.4; }
-
   .laage {
     position: relative;
     aspect-ratio: 2 / 1.15;
@@ -120,7 +91,8 @@
     justify-content: center;
     transition: transform .15s, box-shadow .15s;
   }
-  .laage:not(.aaben):hover { transform: scale(1.05); box-shadow: inset 0 0 12px rgba(0,0,0,.55), 0 0 16px rgba(255, 215, 64, .55); }
+  .laage:not(.aaben):not(.laast):hover { transform: scale(1.05); box-shadow: inset 0 0 12px rgba(0,0,0,.55), 0 0 16px rgba(255, 215, 64, .55); }
+  .laage.laast { cursor: not-allowed; filter: saturate(.45) brightness(.7); }
   .laage .nummer {
     font-size: clamp(18px, 3vw, 28px);
     font-weight: bold;
@@ -136,6 +108,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 6px;
     padding: 7px;
+    aspect-ratio: 2 / 1.15;
   }
   .laage.aaben .nummer { display: none; }
 
@@ -215,9 +188,6 @@
   }
 
   @media (max-width: 900px) {
-    .spil { flex-direction: column; align-items: center; }
-    .juletrae { position: static; width: 100%; max-width: 420px; order: -1; margin-top: 8px; }
-    .trae { font-size: 54px; }
     .kalender { grid-template-columns: repeat(3, 1fr); gap: 7px; width: 100%; }
   }
 </style>
@@ -228,7 +198,7 @@
 
 <header>
   <h1>🎄 Julekalenderen 🎄</h1>
-  <p class="subtitle">Tryk på en låge for at åbne den — og vælg et vindue. 24 af lågerne gemmer en ond kat bag det ene vindue, så vælg klogt!</p>
+  <p class="subtitle">Åbn lågerne i rækkefølge 1–24 og vælg et vindue bag hver. 24 af lågerne gemmer en ond kat bag det ene vindue, så vælg klogt!</p>
 </header>
 
 <div class="gaver" id="gaver"></div>
@@ -236,11 +206,6 @@
 
 <div class="spil">
   <div class="kalender" id="kalender"></div>
-  <aside class="juletrae">
-    <div class="trae">🎄</div>
-    <div class="pynt" id="pynt"></div>
-    <div class="trae-label">Juletræet bliver pyntet med hver god ting, du finder!</div>
-  </aside>
 </div>
 
 <div class="overlay" id="overlay">
@@ -270,7 +235,6 @@
   var kalender = document.getElementById("kalender");
   var gaverEl = document.getElementById("gaver");
   var gaveLabel = document.getElementById("gaveLabel");
-  var pyntEl = document.getElementById("pynt");
   var overlay = document.getElementById("overlay");
   var overlayTitel = document.getElementById("overlayTitel");
   var overlayTekst = document.getElementById("overlayTekst");
@@ -344,7 +308,6 @@
     gaver = ANTAL_GAVER;
     valgte = 0;
     spilAktiv = true;
-    pyntEl.innerHTML = "";
 
     kalender.innerHTML = "";
     for (var d = 0; d < ANTAL_LAAGER; d++) {
@@ -356,8 +319,15 @@
       kalender.appendChild(laage);
     }
 
+    opdaterLaas();
     opdaterGaver();
     overlay.classList.remove("vis");
+  }
+
+  function opdaterLaas() {
+    kalender.querySelectorAll(".laage").forEach(function (l) {
+      l.classList.toggle("laast", parseInt(l.dataset.index, 10) > valgte);
+    });
   }
 
   function opdaterGaver() {
@@ -369,12 +339,14 @@
       gaverEl.appendChild(g);
     }
     gaveLabel.textContent = gaver === 1
-      ? "Du har " + gaver + " gave tilbage — pas godt på den!"
+      ? "ADVARSEL: Du har kun " + gaver + " gave tilbage — pas godt på den!"
       : "Du har " + gaver + " gaver tilbage";
+    gaveLabel.classList.toggle("advarsel", gaver === 1);
   }
 
   function aabenLaage(laage) {
     if (!spilAktiv || laage.classList.contains("aaben")) return;
+    if (parseInt(laage.dataset.index, 10) !== valgte) return;
     spilLyd("laage");
     laage.classList.add("aaben");
     var d = parseInt(laage.dataset.index, 10);
@@ -420,10 +392,6 @@
       var ting = godeTing[d];
       vindue.classList.add("valgt-god");
       vindue.innerHTML = '<span>' + ting[0] + '</span><span class="tekst">' + ting[1] + "</span>";
-      var bit = document.createElement("span");
-      bit.className = "pynt-bit";
-      bit.textContent = ting[0];
-      pyntEl.appendChild(bit);
       valgte++;
       if (valgte === ANTAL_LAAGER && gaver > 0) {
         spilAktiv = false;
@@ -431,6 +399,7 @@
         visOverlay("🎉 HURRAAA — det blev jul! 🎉", "Du åbnede alle 24 låger og beholdt " + gaver + (gaver === 1 ? " gave" : " gaver") + "! God jul!");
       }
     }
+    opdaterLaas();
   }
 
   function visOverlay(titel, tekst) {
