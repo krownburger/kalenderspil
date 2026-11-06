@@ -1,4 +1,4 @@
-var CACHE = "julekalender-v11";
+var CACHE = "julekalender-v12";
 var ASSETS = [
   "./",
   "./index.html",
