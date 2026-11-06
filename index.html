@@ -197,6 +197,49 @@
   .toast.vis { opacity: 1; transform: translateX(-50%) translateY(-50%); }
   .toast.farlig { border-color: #ff5252; color: #ff8a80; box-shadow: 0 0 24px rgba(255, 82, 82, .6); }
 
+  .lucia-popup {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 4, 2, .88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 95;
+    text-align: center;
+    padding: 20px;
+  }
+  .lucia-popup.vis { display: flex; }
+  .lucia-kort {
+    background: linear-gradient(160deg, #6e1f1f, #3d1010);
+    border: 4px solid #ffd740;
+    border-radius: 18px;
+    padding: 28px 34px;
+    max-width: 480px;
+    box-shadow: 0 0 40px rgba(255, 200, 80, .4);
+  }
+  .lucia-kort h2 { font-size: clamp(22px, 4vw, 32px); color: #ffd740; margin-bottom: 10px; }
+  .lucia-kort p { font-size: clamp(15px, 2.2vw, 19px); color: #ffe9c9; line-height: 1.5; }
+  .lucia-scene {
+    position: relative;
+    height: 180px;
+    margin-bottom: 12px;
+    font-size: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .lucia-scene .ild { animation: blink .5s infinite; font-size: 40px; }
+  .drop {
+    position: absolute;
+    font-size: 34px;
+    cursor: pointer;
+    animation: pop .3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .drop.slukket { animation: none; opacity: .9; }
+
   .snefnug {
     position: fixed;
     top: -20px;
@@ -233,6 +276,14 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="lucia-popup" id="luciaPopup">
+  <div class="lucia-kort">
+    <h2>🕯️ Ligeså Luciadag! 🕯️</h2>
+    <div class="lucia-scene" id="luciaScene"><span>👰‍♀️</span><span class="ild">🔥</span></div>
+    <p id="luciaTekst"></p>
+  </div>
+</div>
+
 <div class="overlay" id="overlay">
   <div class="kort">
     <h2 id="overlayTitel"></h2>
@@ -264,6 +315,10 @@
   var overlay = document.getElementById("overlay");
   var toast = document.getElementById("toast");
   var toastTimer;
+  var luciaPopup = document.getElementById("luciaPopup");
+  var luciaScene = document.getElementById("luciaScene");
+  var luciaTekst = document.getElementById("luciaTekst");
+  var luciaTimer;
   var overlayTitel = document.getElementById("overlayTitel");
   var overlayTekst = document.getElementById("overlayTekst");
 
@@ -352,6 +407,7 @@
     opdaterLaas();
     opdaterGaver();
     overlay.classList.remove("vis");
+    luciaPopup.classList.remove("vis");
   }
 
   function opdaterLaas() {
@@ -389,6 +445,58 @@
       vindue.addEventListener("click", function () { vaelgVindue(this); });
       laage.appendChild(vindue);
     }
+    if (d === 12) startLucia();
+  }
+
+  function startLucia() {
+    var total = 5, spawned = 0, slukket = 0, slutKørt = false;
+    luciaTekst.textContent = "Låge 13 — Luciadag! Der er gået ild i brudens hår. Tryk på alle vanddråberne for at slukke ilden og vinde 2 ekstra gaver!";
+    luciaScene.querySelectorAll(".drop").forEach(function (d) { d.remove(); });
+    luciaPopup.classList.add("vis");
+    function slut(vundet) {
+      clearTimeout(luciaTimer);
+      if (vundet) {
+        gaver += 2;
+        opdaterGaver();
+        luciaTekst.textContent = "🎉 Ilden er slukket! Du vandt 2 ekstra gaver!";
+        visToast("🎁🎁 Luciadag reddet — +2 ekstra gaver!", 3000);
+      } else {
+        luciaTekst.textContent = "🔥 Ilden blev ikke helt slukket...";
+      }
+      setTimeout(function () { luciaPopup.classList.remove("vis"); }, 2200);
+    }
+    function tjekSlut() {
+      if (slutKørt || spawned < total) return;
+      if (luciaScene.querySelector(".drop:not(.slukket)")) return;
+      slutKørt = true;
+      slut(slukket === total);
+    }
+    function spawn() {
+      if (spawned >= total) return;
+      spawned++;
+      var drop = document.createElement("span");
+      drop.className = "drop";
+      drop.textContent = "💧";
+      drop.style.left = (8 + Math.random() * 70) + "%";
+      drop.style.top = (8 + Math.random() * 65) + "%";
+      drop.addEventListener("click", function () {
+        if (drop.classList.contains("slukket")) return;
+        drop.classList.add("slukket");
+        drop.textContent = "✨";
+        slukket++;
+        clearTimeout(drop._t);
+        setTimeout(function () { drop.remove(); }, 250);
+        if (slukket === total) { slutKørt = true; slut(true); return; }
+        tjekSlut();
+      });
+      drop._t = setTimeout(function () {
+        drop.remove();
+        tjekSlut();
+      }, 1300);
+      luciaScene.appendChild(drop);
+      luciaTimer = setTimeout(spawn, 800);
+    }
+    spawn();
   }
 
   function vaelgVindue(vindue) {
