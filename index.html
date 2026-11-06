@@ -273,6 +273,7 @@
     laage: ["lyd/laage.mp3", "lyd/laage.ogg", "lyd/laage.wav", "lyd/laage.m4a"],
     god: ["lyd/god.mp3", "lyd/god.ogg", "lyd/god.wav", "lyd/god.m4a"],
     kat: ["lyd/kat.mp3", "lyd/kat.ogg", "lyd/kat.wav", "lyd/kat.m4a"],
+    ekstragave: ["lyd/ekstragave.mp3", "lyd/ekstragave.ogg", "lyd/ekstragave.wav", "lyd/ekstragave.m4a"],
     sejr: ["lyd/sejr.mp3", "lyd/sejr.ogg", "lyd/sejr.wav", "lyd/sejr.m4a"],
     tab: ["lyd/tab.mp3", "lyd/tab.ogg", "lyd/tab.wav", "lyd/tab.m4a"]
   };
@@ -441,7 +442,7 @@
   }
 
   function visEkstraGave() {
-    spilLyd("god");
+    spilLyd("ekstragave");
     visToast("🎁 Ekstra gave! Du har nu " + gaver + (gaver === 1 ? " gave" : " gaver") + " i sækken!", 3000);
   }
 

@@ -7,6 +7,7 @@ Læg lydfiler ind i denne mappe for at få lydeffekter i spillet. Filerne skal h
 | `laage.mp3` / `.ogg` / `.wav` / `.m4a` | en låge åbnes |
 | `god.mp3` / `.ogg` / `.wav` / `.m4a` | du finder en god juleting |
 | `kat.mp3` / `.ogg` / `.wav` / `.m4a` | en ond kat dukker op |
+| `ekstragave.mp3` / `.ogg` / `.wav` / `.m4a` | du finder en ekstra gave |
 | `sejr.mp3` / `.ogg` / `.wav` / `.m4a` | du vinder (HURRAAA) |
 | `tab.mp3` / `.ogg` / `.wav` / `.m4a` | du taber (suk hulk) |
 
