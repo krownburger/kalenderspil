@@ -175,6 +175,27 @@
   }
   .overlay button:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a2c00; }
 
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(160deg, #6e1f1f, #3d1010);
+    border: 3px solid #ffd740;
+    border-radius: 14px;
+    padding: 12px 22px;
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: #ffd740;
+    font-weight: bold;
+    box-shadow: 0 0 24px rgba(255, 200, 80, .5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 90;
+    text-align: center;
+  }
+  .toast.vis { opacity: 1; transform: translateX(-50%) translateY(0); }
+
   .snefnug {
     position: fixed;
     top: -20px;
@@ -209,6 +230,8 @@
   <div class="kalender" id="kalender"></div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <div class="overlay" id="overlay">
   <div class="kort">
     <h2 id="overlayTitel"></h2>
@@ -238,6 +261,8 @@
   var gaverEl = document.getElementById("gaver");
   var gaveLabel = document.getElementById("gaveLabel");
   var overlay = document.getElementById("overlay");
+  var toast = document.getElementById("toast");
+  var toastTimer;
   var overlayTitel = document.getElementById("overlayTitel");
   var overlayTekst = document.getElementById("overlayTekst");
 
@@ -397,6 +422,7 @@
       if (erEkstra) {
         gaver++;
         opdaterGaver();
+        visEkstraGave();
         vindue.innerHTML = '<span>🎁</span><span class="tekst">Ekstra gave!</span>';
       } else {
         var ting = godeTing[d];
@@ -410,6 +436,13 @@
       }
     }
     opdaterLaas();
+  }
+
+  function visEkstraGave() {
+    toast.textContent = "🎁 Ekstra gave! Du har nu " + gaver + (gaver === 1 ? " gave" : " gaver") + " i sækken!";
+    toast.classList.add("vis");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("vis"); }, 2200);
   }
 
   function visOverlay(titel, tekst) {
