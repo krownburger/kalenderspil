@@ -195,6 +195,7 @@
     text-align: center;
   }
   .toast.vis { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.farlig { border-color: #ff5252; color: #ff8a80; box-shadow: 0 0 24px rgba(255, 82, 82, .6); }
 
   .snefnug {
     position: fixed;
@@ -410,6 +411,7 @@
       vindue.innerHTML = '<span>😾</span><span class="tekst">Ond kat!</span>';
       gaver--;
       opdaterGaver();
+      if (gaver === 1) visToast("⚠️ Kun 1 gave tilbage — pas godt på den!", 3000, "farlig");
       valgte++;
       if (gaver <= 0) {
         spilAktiv = false;
@@ -439,10 +441,17 @@
   }
 
   function visEkstraGave() {
-    toast.textContent = "🎁 Ekstra gave! Du har nu " + gaver + (gaver === 1 ? " gave" : " gaver") + " i sækken!";
+    spilLyd("god");
+    visToast("🎁 Ekstra gave! Du har nu " + gaver + (gaver === 1 ? " gave" : " gaver") + " i sækken!", 3000);
+  }
+
+  function visToast(tekst, varighed, klasse) {
+    toast.classList.remove("farlig");
+    if (klasse) toast.classList.add(klasse);
+    toast.textContent = tekst;
     toast.classList.add("vis");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toast.classList.remove("vis"); }, 2200);
+    toastTimer = setTimeout(function () { toast.classList.remove("vis"); }, varighed);
   }
 
   function visOverlay(titel, tekst) {
