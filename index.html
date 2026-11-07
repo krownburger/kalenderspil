@@ -2,7 +2,7 @@
 <html lang="da">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Julekalenderen</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#5b1f1f">
@@ -14,6 +14,11 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
 
+  html {
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: "Georgia", "Times New Roman", serif;
     min-height: 100vh;
@@ -21,7 +26,11 @@
     color: #ffe9c9;
     overflow-x: hidden;
     position: relative;
+    touch-action: pan-x pan-y;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  button, .laage, .vindue { touch-action: manipulation; }
 
   .lysstreng {
     display: flex;
@@ -256,6 +265,29 @@
   @media (max-width: 900px) {
     .kalender { grid-template-columns: repeat(3, 1fr); gap: 7px; width: 100%; }
   }
+
+  @media (max-width: 480px) {
+    .lysstreng { font-size: 16px; padding-top: 6px; }
+    header { padding: 4px 8px 10px; }
+    .gaver { font-size: 26px; gap: 6px; }
+    .gave-label { font-size: 12px; margin-bottom: 6px; }
+    .spil { padding: 0 10px 28px; gap: 12px; }
+    .kalender { grid-template-columns: repeat(3, 1fr); gap: 6px; padding-top: 6px; }
+    .laage { border-width: 2px; border-radius: 8px; }
+    .laage .nummer { font-size: 17px; }
+    .laage .stjerne { font-size: 11px; top: 3px; right: 5px; }
+    .laage.aaben { padding: 5px; gap: 4px; border-width: 2px; }
+    .vindue { border-width: 1px; font-size: 18px; padding: 2px; }
+    .vindue .tekst { font-size: 9px; }
+    .overlay { padding: 12px; }
+    .overlay .kort { padding: 24px 20px; border-width: 3px; max-width: 100%; }
+    .overlay button { font-size: 18px; padding: 10px 22px; }
+    .lucia-popup { padding: 12px; }
+    .lucia-kort { padding: 20px 18px; border-width: 3px; max-width: 100%; }
+    .lucia-scene { height: 150px; font-size: 52px; }
+    .lucia-scene .ild { font-size: 32px; }
+    .drop { font-size: 28px; }
+  }
 </style>
 </head>
 <body>
@@ -292,6 +324,14 @@
   </div>
 </div>
 
+<div class="overlay" id="luciaOverlay">
+  <div class="kort">
+    <h2>🕯️ Lucia d. 13. december 🕯️</h2>
+    <p>Låge 13 er Luciadag! Der er gået ild i brudens hår 🔥 Tryk på alle vanddråberne for at slukke ilden og vinde 2 ekstra gaver, når du er klar!</p>
+    <button id="luciaKlar">✨ Jeg er klar!</button>
+  </div>
+</div>
+
 <script>
 (function () {
   var ANTAL_LAAGER = 24;
@@ -323,6 +363,7 @@
   var overlayTekst = document.getElementById("overlayTekst");
 
   var katLaager, katSide, ekstraLaager, gaver, valgte, spilAktiv;
+  var luciaLaage = null;
 
   var LYD_FILER = {
     laage: ["lyd/laage.mp3", "lyd/laage.ogg", "lyd/laage.wav", "lyd/laage.m4a"],
@@ -408,6 +449,8 @@
     opdaterGaver();
     overlay.classList.remove("vis");
     luciaPopup.classList.remove("vis");
+    luciaLaage = null;
+    document.getElementById("luciaOverlay").classList.remove("vis");
   }
 
   function opdaterLaas() {
@@ -433,6 +476,19 @@
   function aabenLaage(laage) {
     if (!spilAktiv || laage.classList.contains("aaben")) return;
     if (parseInt(laage.dataset.index, 10) !== valgte) return;
+    var d = parseInt(laage.dataset.index, 10);
+    if (d === 12 && !laage.dataset.luciaIntro) {
+      laage.dataset.luciaIntro = "1";
+      luciaLaage = laage;
+      spilLyd("laage");
+      document.getElementById("luciaOverlay").classList.add("vis");
+      return;
+    }
+    aabenLaageNu(laage);
+  }
+
+  function aabenLaageNu(laage) {
+    if (!spilAktiv || laage.classList.contains("aaben")) return;
     spilLyd("laage");
     laage.classList.add("aaben");
     var d = parseInt(laage.dataset.index, 10);
@@ -570,6 +626,19 @@
   }
 
   document.getElementById("startIgen").addEventListener("click", nulstil);
+
+  document.getElementById("luciaKlar").addEventListener("click", function () {
+    document.getElementById("luciaOverlay").classList.remove("vis");
+    if (luciaLaage) {
+      var laage = luciaLaage;
+      luciaLaage = null;
+      aabenLaageNu(laage);
+    }
+  });
+
+  document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
+  document.addEventListener("gesturechange", function (e) { e.preventDefault(); });
+  document.addEventListener("dblclick", function (e) { e.preventDefault(); });
 
   opretLys();
   opretSne();
